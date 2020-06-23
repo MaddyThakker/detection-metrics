@@ -19,14 +19,15 @@ parser.add_argument('-q', '--quiet', help="minimalistic console output.", action
 parser.add_argument('-i', '--ignore', nargs='+', type=str, help="ignore a list of classes.")
 # argparse receiving list of classes with specific IoU (e.g., python main.py --set-class-iou person 0.7)
 parser.add_argument('--set-class-iou', nargs='+', type=str, help="set IoU for a specific class.")
+parser.add_argument('--image_size', nargs = '+', type=int, help = "image size")
 args = parser.parse_args()
+image_size_passed = args.image_size
 
 
 classes_desc = []
 f = open("/content/classes.txt", "r")
 for x in f:
   classes_desc.append(x)
-
 
 '''
     0,0 ------> x (width)
@@ -340,7 +341,7 @@ def draw_plot_func(dictionary, n_classes, window_title, plot_title, x_label, out
 """
  Create a ".temp_files/" and "output/" directory
 """
-TEMP_FILES_PATH = ".temp_files"
+TEMP_FILES_PATH = "temp_files"
 if not os.path.exists(TEMP_FILES_PATH): # if it doesn't exist already
     os.makedirs(TEMP_FILES_PATH)
 output_files_path = "output"
@@ -370,7 +371,7 @@ counter_images_per_class = {}
 
 gt_files = []
 for txt_file in ground_truth_files_list:
-    #print(txt_file)
+    print(txt_file)
     file_id = txt_file.split(".txt", 1)[0]
     file_id = os.path.basename(os.path.normpath(file_id))
     # check if there is a correspondent detection-results file
@@ -385,20 +386,28 @@ for txt_file in ground_truth_files_list:
     is_difficult = False
     already_seen_classes = []
     for line in lines_list:
-        try:
-            if "difficult" in line:
-                    class_name, left, top, right, bottom, _difficult = line.split()
-                    is_difficult = True
-            else:
-                    class_name, left, top, right, bottom = line.split()
-                    class_name = classes_desc[class_name]
-        except ValueError:
-            error_msg = "Error: File " + txt_file + " in the wrong format.\n"
-            error_msg += " Expected: <class_name> <left> <top> <right> <bottom> ['difficult']\n"
-            error_msg += " Received: " + line
-            error_msg += "\n\nIf you have a <class_name> with spaces between words you should remove them\n"
-            error_msg += "by running the script \"remove_space.py\" or \"rename_class.py\" in the \"extra/\" folder."
-            error(error_msg)
+        if "difficult" in line:
+                class_name, left, top, right, bottom, _difficult = line.split()
+                is_difficult = True
+        else:
+                sz = image_size_passed
+                class_name, left, top, right, bottom = line.split()
+                left = float(left)
+                top = float(top)
+                right = float(right)
+                bottom  = float(bottom)
+                centre = (int(left*sz[0]), int(top*sz[1]))
+                boxWidth = int( right* sz[0])
+                boxHeight = int(bottom * sz[1])
+                cropbox = (int(centre[0] - boxWidth / 2), int(centre[1] - boxHeight / 2), int(centre[0] + boxWidth / 2), int(centre[1] + boxHeight / 2))
+                # print(cropbox)
+                left, top, right, bottom = cropbox
+                left = str(left)
+                top = str(top)
+                right = str(right)
+                bottom = str(bottom)
+                class_name = classes_desc[int(class_name)]
+
         # check if class is in the ignore list, if yes skip
         if class_name in args.ignore:
             continue
