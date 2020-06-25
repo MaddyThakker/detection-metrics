@@ -503,7 +503,7 @@ ap_dictionary = {}
 lamr_dictionary = {}
 # open file to store the output
 with open(output_files_path + "/output.txt", 'w') as output_file:
-    output_file.write("# AP and precision/recall per class\n")
+    # output_file.write("# AP and precision/recall per class\n")
     count_true_positives = {}
     for class_index, class_name in enumerate(gt_classes):
         count_true_positives[class_name] = 0
@@ -676,13 +676,13 @@ with open(output_files_path + "/output.txt", 'w') as output_file:
 
         ap, mrec, mprec = voc_ap(rec[:], prec[:])
         sum_AP += ap
-        text = "{0:.2f}%".format(ap*100) + " = " + class_name + " AP " #class_name + " AP = {0:.2f}%".format(ap*100)
+        text = class_name + "->" + "{0:.2f}%".format(ap*100) #class_name + " AP = {0:.2f}%".format(ap*100)
         """
          Write to output.txt
         """
         rounded_prec = [ '%.2f' % elem for elem in prec ]
         rounded_rec = [ '%.2f' % elem for elem in rec ]
-        output_file.write(text + "\n Precision: " + str(rounded_prec) + "\n Recall :" + str(rounded_rec) + "\n\n")
+        output_file.write(text +"\n")
         if not args.quiet:
             print(text)
         ap_dictionary[class_name] = ap
@@ -725,11 +725,11 @@ with open(output_files_path + "/output.txt", 'w') as output_file:
     if show_animation:
         cv2.destroyAllWindows()
 
-    output_file.write("\n# mAP of all classes\n")
+    # output_file.write("\n# mAP of all classes\n")
     mAP = sum_AP / n_classes
-    text = "mAP = {0:.2f}%".format(mAP*100)
+    text = "={0:.2f}%".format(mAP*100)
     output_file.write(text + "\n")
-    print(text)
+    # print(text)
 
 """
  Draw false negatives
@@ -806,10 +806,10 @@ if draw_plot:
 """
  Write number of ground-truth objects per class to results.txt
 """
-with open(output_files_path + "/output.txt", 'a') as output_file:
-    output_file.write("\n# Number of ground-truth objects per class\n")
-    for class_name in sorted(gt_counter_per_class):
-        output_file.write(class_name + ": " + str(gt_counter_per_class[class_name]) + "\n")
+# with open(output_files_path + "/output.txt", 'a') as output_file:
+#     output_file.write("\n# Number of ground-truth objects per class\n")
+#     for class_name in sorted(gt_counter_per_class):
+#         output_file.write(class_name + ": " + str(gt_counter_per_class[class_name]) + "\n")
 
 """
  Finish counting true positives
@@ -851,14 +851,14 @@ if draw_plot:
 """
  Write number of detected objects per class to output.txt
 """
-with open(output_files_path + "/output.txt", 'a') as output_file:
-    output_file.write("\n# Number of detected objects per class\n")
-    for class_name in sorted(dr_classes):
-        n_det = det_counter_per_class[class_name]
-        text = class_name + ": " + str(n_det)
-        text += " (tp:" + str(count_true_positives[class_name]) + ""
-        text += ", fp:" + str(n_det - count_true_positives[class_name]) + ")\n"
-        output_file.write(text)
+# with open(output_files_path + "/output.txt", 'a') as output_file:
+#     output_file.write("\n# Number of detected objects per class\n")
+#     for class_name in sorted(dr_classes):
+#         n_det = det_counter_per_class[class_name]
+#         text = class_name + ": " + str(n_det)
+#         text += " (tp:" + str(count_true_positives[class_name]) + ""
+#         text += ", fp:" + str(n_det - count_true_positives[class_name]) + ")\n"
+#         output_file.write(text)
 
 """
  Draw log-average miss rate plot (Show lamr of all classes in decreasing order)
